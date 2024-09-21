@@ -1,6 +1,6 @@
-const axios = require('axios');
+const https = require('https');
 
-module.exports = async (req, res) => {
+module.exports = (req, res) => {
     const { uid } = req.query;
 
     if (!uid) {
@@ -9,17 +9,20 @@ module.exports = async (req, res) => {
 
     const apiUrl = `https://likes.freefireinfo.site/api/me/${uid}?key=fadai_like`;
 
-    try {
-        const response = await axios.get(apiUrl);
+    https.get(apiUrl, (response) => {
+        let data = '';
 
-        // التأكد من أن البيانات موجودة
-        if (!response.data) {
-            return res.status(404).json({ error: 'لم يتم العثور على بيانات.' });
-        }
+        // جمع البيانات
+        response.on('data', (chunk) => {
+            data += chunk;
+        });
 
-        res.status(200).json(response.data);
-    } catch (error) {
+        // الانتهاء من استلام البيانات
+        response.on('end', () => {
+            res.status(200).json(JSON.parse(data));
+        });
+    }).on('error', (error) => {
         console.error('حدث خطأ:', error.message);
         res.status(500).json({ error: 'حدث خطأ أثناء معالجة الطلب.' });
-    }
+    });
 };
