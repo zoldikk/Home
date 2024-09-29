@@ -1,10 +1,19 @@
 const https = require('https');
 
 module.exports = (req, res) => {
-    const { uid } = req.query;
+    const { uid, code } = req.query;
 
+    // تحقق من وجود uid و code
     if (!uid) {
         return res.status(400).json({ error: 'الرجاء توفير UID في الاستعلام.' });
+    }
+    if (!code) {
+        return res.status(400).json({ error: 'الرجاء توفير code في الاستعلام.' });
+    }
+
+    // تحقق من صحة الكود
+    if (code !== 'FADAI1900mp') {
+        return res.status(403).json({ error: 'الوصول غير مصرح به.' });
     }
 
     const apiUrl = `https://likes.freefireinfo.site/api/me/${uid}?key=fadai_like`;
